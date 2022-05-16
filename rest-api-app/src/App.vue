@@ -1,25 +1,58 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+    <input type="text" v-model="nameis" v-on:keyup.enter="PostApi()" >
+    <table>
+      <tr>
+        <td>ID</td>
+        <td>Name</td>
+        <td>Update</td>
+        <td>Delete</td>
+      </tr>
+      <tr v-for="todo of todos" v-bind:key="todo.id">
+        <td>{{ todo.id }}</td>
+        <td><input type="text" v-model="todo.name" /></td>
+        <td> <button v-on:click="UpdateApi(todo.id,todo.name)"> Update </button> </td>
+        <td> <button v-on:click="DeleteApi(todo.id)" >Delete</button></td>
+      </tr>
+    </table>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import axios from "axios";
+const baseUrl = "http://localhost:3000/todos/";
 export default {
   name: 'App',
-  components: {
-    HelloWorld
+  data() {
+    return{
+      todos:[],
+      nameis:''
+    }
+  },
+  methods: {
+    async GetApi(){
+      await axios.get(baseUrl).then((resp) => {this.todos = resp.data}).catch((err) => {console.log(err);});
+    },
+    async PostApi(){
+      await axios.post(baseUrl, {name:this.nameis}).then((resp) => {console.log(resp); this.nameis=''; this.GetApi(); }).catch((err) => {console.log(err);});
+    },
+    async DeleteApi(id){
+      await axios.delete(baseUrl+id).then((resp) => {console.log(resp); this.GetApi(); }).catch((err) => {console.log(err);});
+    },
+    async UpdateApi(id,name){
+      await axios.put(baseUrl+id, {name:name}).then((resp) => {console.log(resp); this.GetApi(); }).catch((err) => {console.log(err);});
+    },
+  },
+  mounted(){
+    this.GetApi();
   }
-}
+};
 </script>
-
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   margin-top: 60px;
 }
